@@ -105,7 +105,7 @@ function J = EVObjectiveFCN(u, N, Ts, v_curr, v_ref, veh, info, Em1, Em2)
             power_ref = abs(F_trac*v_k);
         end
         J1 = (power_ref - power_gen)'*1*(power_ref - power_gen);
-        J2 =  (((prev_EM1-u(2,i))/Ts)+((prev_EM2-u(3,i))/Ts)*veh.mot_inertia);
+        J2 =  abs(((prev_EM1-u(2,i))/Ts)*veh.mot_inertia)+abs(((prev_EM2-u(3,i))/Ts)*veh.mot_inertia);
         J = J + J1 + J2;
         
         % Calculating resistance forces

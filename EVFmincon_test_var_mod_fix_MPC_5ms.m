@@ -1,13 +1,17 @@
-function [U_f,U_r] = EVFmincon_test_v4(req_data, current_timestep,SOC, v_curr,Torque_demand)
+function [U_f,U_r,min_Pwr] = EVNMPC_mod(req_data, current_timestep,SOC, v_curr,Torque_demand, EMspeed)
 %% Extrinsic function used by Nonlinear MPC Block
-%% Variable model-fixed MPC
-% Initializing U vector
-    N=4;
-    Ts=5e0-4;    
-% Using motor speed as decision variable
+    %% Variable model-fixed MPC
+    % Initializing U vector
+    N=10;
+    Ts=1e0-2;    
+    % Using motor speed as decision variable
     u0 = repmat([0.5;500;500],1,N);
     LB = repmat([0;0;0],1,N);
     UB = repmat([1;1675;1675],1,N);
+
+     % Motor speed
+     Em1=EMspeed(1,1);
+     Em2=EMspeed(2,1);
     
     %% Vehicle constants
    
@@ -48,6 +52,7 @@ function [U_f,U_r] = EVFmincon_test_v4(req_data, current_timestep,SOC, v_curr,To
     if (Torque_demand==0)
         U_f=0;
         U_r=0;
+        min_Pwr=0;
         return
     end
     [uopt,~,~,~]= fmincon(COST,u0,[],[],[],[],LB,UB,CONSTRAINTS,options);
@@ -55,6 +60,16 @@ function [U_f,U_r] = EVFmincon_test_v4(req_data, current_timestep,SOC, v_curr,To
     %disp(exitflag)
     U_f=uopt(1,1)*Torque_demand;
     U_r=Torque_demand-U_f;
+     % Calculating eta_f & eta_r
+     if (Torque_demand > 0)
+        eta_f = interp2(info.torque,info.speed,info.eff,min(U_f,450),Em1);
+        eta_r = interp2(info.torque,info.speed,info.eff,min(U_r,450),Em2);
+        min_Pwr=(((U_f*Em1)/(0.01*eta_f)) + ((U_r*Em2)/(0.01*eta_r)))*0.3012/0.98;
+    else
+        eta_f = interp2(info.torque,info.speed,info.eff,min(abs(U_f),450),Em1);
+        eta_r = interp2(info.torque,info.speed,info.eff,min(abs(U_r),450),Em2);
+        min_Pwr=(((U_f*Em1)*(0.01*eta_f)) + ((U_r*Em2)*(0.01*eta_r)))*0.3012*0.98;
+    end
 end
 
 function J = EVObjectiveFCN(u, N, Ts, v_curr, v_ref, veh, info)

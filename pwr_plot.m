@@ -1,7 +1,8 @@
 % Load data
 data = load("pwr_comp_2.mat");
+m_data=load("NMPC_mod2.mat");
 baseline_pwr = data.out.min_Pwr;
-mpc_pwr = data.out.mpc_pwr; % Adjusted MPC power for comparison
+mpc_pwr = m_data.out.mpc_pwr*0.3012; % Adjusted MPC power for comparison
 %true_pwr = sum(data.out.real_pwr, 2);
 
 % Plot power comparison
