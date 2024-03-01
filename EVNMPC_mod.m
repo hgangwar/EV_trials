@@ -1,8 +1,8 @@
-function [U_f,U_r,min_Pwr] = EVNMPC_mod(req_data, current_timestep,SOC, v_curr,Torque_demand, EMspeed)
+function [U_f,U_r,min_Pwr, flag] = EVNMPC_mod(req_data, current_timestep,SOC, v_curr,Torque_demand, EMspeed)
 %% Extrinsic function used by Nonlinear MPC Block
     % Initializing U vector
     N=10;
-    Ts=1e0-2;    
+    Ts=1e0-1;    
     % Using motor speed as decision variable
     u0 = repmat([0.5;500;500],1,N);
     LB = repmat([0;0;0],1,N);
@@ -36,6 +36,10 @@ function [U_f,U_r,min_Pwr] = EVNMPC_mod(req_data, current_timestep,SOC, v_curr,T
             v_ref(i)=req_data.ftp75_5ms(current_timestep+(j*i),1);
         end
     end
+
+    %% Wheel torque to EM torque
+    EMtrq_demand=0.3012*Torque_demand;
+
     %% Loading effeciency map
     info.eff = req_data.eff;
     info.torque = req_data.torque;
@@ -50,21 +54,24 @@ function [U_f,U_r,min_Pwr] = EVNMPC_mod(req_data, current_timestep,SOC, v_curr,T
         U_f=0;
         U_r=0;
         min_Pwr=0;
+        flag=-3;
         return
     end
-    [uopt,~,~,~]= fmincon(COST,u0,[],[],[],[],LB,UB,CONSTRAINTS,options);
+    [uopt,~,flag,~]= fmincon(COST,u0,[],[],[],[],LB,UB,CONSTRAINTS,options);
+    EM_f=uopt(1,1)*EMtrq_demand;
+    EM_r=EMtrq_demand-EM_f;
     U_f=uopt(1,1)*Torque_demand;
     U_r=Torque_demand-U_f;
 
     % Calculating eta_f & eta_r
     if (Torque_demand > 0)
-        eta_f = interp2(info.torque,info.speed,info.eff,min(U_f,450),Em1);
-        eta_r = interp2(info.torque,info.speed,info.eff,min(U_r,450),Em2);
-        min_Pwr=(((U_f*Em1)/(0.01*eta_f)) + ((U_r*Em2)/(0.01*eta_r)))/0.98;
+        eta_f = interp2(info.torque,info.speed,info.eff,min(EM_f,450),Em1);
+        eta_r = interp2(info.torque,info.speed,info.eff,min(EM_r,450),Em2);
+        min_Pwr=(((EM_f*Em1)/(0.01*eta_f)) + ((EM_r*Em2)/(0.01*eta_r)))/0.98;
     else
-        eta_f = interp2(info.torque,info.speed,info.eff,min(abs(U_f),450),Em1);
-        eta_r = interp2(info.torque,info.speed,info.eff,min(abs(U_r),450),Em2);
-        min_Pwr=(((U_f*Em1)*(0.01*eta_f)) + ((U_r*Em2)*(0.01*eta_r)))*0.98;
+        eta_f = interp2(info.torque,info.speed,info.eff,min(abs(EM_f),450),Em1);
+        eta_r = interp2(info.torque,info.speed,info.eff,min(abs(EM_r),450),Em2);
+        min_Pwr=(((EM_f*Em1)*(0.01*eta_f)) + ((EM_r*Em2)*(0.01*eta_r)))*0.98;
     end
     
 end
@@ -86,22 +93,24 @@ function J = EVObjectiveFCN(u, N, Ts, v_curr, v_ref, veh, info, Em1, Em2)
     for i=1:N
 
         % Calculating eta_f & eta_r
+        %% Wheel torque to EM torque
+        EMtrq_demand=0.3012*Torque_demand;
         if (torque_demand > 0)
-            eta_f = interp2(info.torque,info.speed,info.eff,u(1,i)*min(torque_demand,450),u(2,i));
-            eta_r = interp2(info.torque,info.speed,info.eff,(1-u(1,i))*min(torque_demand,450),u(3,i));
+            eta_f = interp2(info.torque,info.speed,info.eff,u(1,i)*min(EMtrq_demand,450),u(2,i));
+            eta_r = interp2(info.torque,info.speed,info.eff,(1-u(1,i))*min(EMtrq_demand,450),u(3,i));
         else
-            eta_f = interp2(info.torque,info.speed,info.eff,u(1,i)*min(abs(torque_demand),450),u(2,i));
-            eta_r = interp2(info.torque,info.speed,info.eff,(1-u(1,i))*min(abs(torque_demand),450),u(3,i));
+            eta_f = interp2(info.torque,info.speed,info.eff,u(1,i)*min(abs(EMtrq_demand),450),u(2,i));
+            eta_r = interp2(info.torque,info.speed,info.eff,(1-u(1,i))*min(abs(EMtrq_demand),450),u(3,i));
         end
 
         %Calculating J
 
         % penalise excess power
         if (torque_demand > 0)
-            power_gen = ((u(1,i)*torque_demand*u(2,i))/(0.01*eta_f)) + (((1-u(1,i))*torque_demand*u(3,i))/(0.01*eta_r));
+            power_gen = ((u(1,i)*EMtrq_demand*u(2,i))/(0.01*eta_f)) + (((1-u(1,i))*EMtrq_demand*u(3,i))/(0.01*eta_r));
             power_ref = F_trac*v_k;
         else
-            power_gen = abs(((u(1,i)*torque_demand*u(2,i))*(0.01*eta_f)) + (((1-u(1,i))*torque_demand*u(3,i))*(0.01*eta_r)));
+            power_gen = abs(((u(1,i)*EMtrq_demand*u(2,i))*(0.01*eta_f)) + (((1-u(1,i))*EMtrq_demand*u(3,i))*(0.01*eta_r)));
             power_ref = abs(F_trac*v_k);
         end
         J1 = (power_ref - power_gen)'*1*(power_ref - power_gen);
