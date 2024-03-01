@@ -1,4 +1,4 @@
-function [U_f,U_r,min_Pwr, flag] = EVNMPC_mod(req_data, current_timestep,SOC, v_curr,Torque_demand, EMspeed)
+function [U_f,U_r,min_Pwr, flag] = EVNMPC_lb(req_data, current_timestep,SOC, v_curr,Torque_demand, EMspeed)
 %% Extrinsic function used by Nonlinear MPC Block
     % Initializing U vector
     N=10;
@@ -23,8 +23,8 @@ function [U_f,U_r,min_Pwr, flag] = EVNMPC_mod(req_data, current_timestep,SOC, v_
     %veh.dmp_cnst= 100;      %Damping constant of drive shaft
     %veh.spring_const= 5000; %Spring constrant of drive shaft
     veh.mot_inertia= 0.01;      %Motor inertia
-    veh.h = 0.3;
-    veh.b = 1.7;
+    veh.h = 0.67;
+    veh.L = 2.79;
     veh.a = 1.09;
  
     %% Velocity Reference Vector
@@ -93,6 +93,9 @@ function J = EVObjectiveFCN(u, N, Ts, v_curr, v_ref, veh, info, Em1, Em2)
     for i=1:N
         % Calculating eta_f & eta_r
         %% Wheel torque to EM torque
+        acc=(v_ref-v_k)/Ts;
+        Rf= veh.M*((9.81/2)-(veh.h*acc/veh.L));
+        Rr= veh.M*((9.81/2)+(veh.h*acc/veh.L));
         EMtrq_demand=0.3012*torque_demand;
         if (torque_demand >= 0)
             eta_f = interp2(info.torque,info.speed,info.eff,u(1,i)*min(EMtrq_demand,450),u(2,i));
@@ -113,7 +116,8 @@ function J = EVObjectiveFCN(u, N, Ts, v_curr, v_ref, veh, info, Em1, Em2)
             power_ref = abs(F_trac*v_k);
         end
         J1 = (power_ref - power_gen)'*1*(power_ref - power_gen);
-        J2 =  abs(((prev_EM1-u(2,i))/Ts)*veh.mot_inertia)+abs(((prev_EM2-u(3,i))/Ts)*veh.mot_inertia);
+        %J2 =  abs(((prev_EM1-u(2,i))/Ts)*veh.mot_inertia)+abs(((prev_EM2-u(3,i))/Ts)*veh.mot_inertia);
+        %J2 = 
         J = J + J1 + J2;
         
         % Calculating resistance forces
