@@ -4,9 +4,9 @@ function [U_f,U_r,min_Pwr, flag] = EVNMPC_mod(req_data, current_timestep,SOC, v_
     N=10;
     Ts=1e0-1;    
     % Using motor speed as decision variable
-    u0 = repmat([0.5;500;500],1,N);
-    LB = repmat([0;0;0],1,N);
-    UB = repmat([1;1675;1675],1,N);
+    u0 = repmat(0.5,1,N);
+    LB = zeros(1,N);
+    UB = ones(1,N);
 
     % Motor speed
     Em1=EMspeed(1,1);
@@ -26,6 +26,7 @@ function [U_f,U_r,min_Pwr, flag] = EVNMPC_mod(req_data, current_timestep,SOC, v_
     veh.h = 0.3;
     veh.b = 1.7;
     veh.a = 1.09;
+    veh.axle_diff_ratio=3.32;
  
     %% Velocity Reference Vector
     v_ref=zeros(N,1);
@@ -47,7 +48,7 @@ function [U_f,U_r,min_Pwr, flag] = EVNMPC_mod(req_data, current_timestep,SOC, v_
     
     %% Torque limit data
     info.torque_limit=req_data.TorqueVsSpeed;
-    COST = @(u) EVObjectiveFCN(u, N, Ts, v_curr, v_ref, veh, info, Em1, Em2);
+    COST = @(u) EVObjectiveFCN(u, N, Ts, v_curr, v_ref, veh, info);
     CONSTRAINTS = @(u) EVConstraintFCN(SOC,u, N,Ts,veh,v_curr,v_ref, info);
     options = optimoptions('fmincon','Algorithm','sqp','Display','iter');
     if (Torque_demand==0)
@@ -58,9 +59,9 @@ function [U_f,U_r,min_Pwr, flag] = EVNMPC_mod(req_data, current_timestep,SOC, v_
         return
     end
     [uopt,~,flag,~]= fmincon(COST,u0,[],[],[],[],LB,UB,CONSTRAINTS,options);
-    EM_f=uopt(1,1)*EMtrq_demand;
+    EM_f=uopt(1)*EMtrq_demand;
     EM_r=EMtrq_demand-EM_f;
-    U_f=uopt(1,1)*Torque_demand;
+    U_f=uopt(1)*Torque_demand;
     U_r=Torque_demand-U_f;
 
     % Calculating eta_f & eta_r
@@ -76,7 +77,7 @@ function [U_f,U_r,min_Pwr, flag] = EVNMPC_mod(req_data, current_timestep,SOC, v_
     
 end
 
-function J = EVObjectiveFCN(u, N, Ts, v_curr, v_ref, veh, info, Em1, Em2)
+function J = EVObjectiveFCN(u, N, Ts, v_curr, v_ref, veh, info)
     v_k = v_curr;
     J = 0;
     % For initial condition
@@ -87,38 +88,38 @@ function J = EVObjectiveFCN(u, N, Ts, v_curr, v_ref, veh, info, Em1, Em2)
     % Calculating current torque demand
     F_trac = F_aero + F_rr + veh.M*(v_ref(1) - v_k)/Ts;
     torque_demand = F_trac*veh.R_whl;
-    prev_EM1=Em1;
-    prev_EM2=Em2;
+    %prev_EM1=Em1;
+    %prev_EM2=Em2;
     
     for i=1:N
         % Calculating eta_f & eta_r
         %% Wheel torque to EM torque
         EMtrq_demand=0.3012*torque_demand;
+        EM_sp = abs(v_k*veh.axle_diff_ratio/veh.Wheel);
+        EM_sp=min(1675,EM_sp);
         if (torque_demand >= 0)
-            eta_f = interp2(info.torque,info.speed,info.eff,u(1,i)*min(EMtrq_demand,450),u(2,i));
-            eta_r = interp2(info.torque,info.speed,info.eff,(1-u(1,i))*min(EMtrq_demand,450),u(3,i));
+            eta_f = interp2(info.torque,info.speed,info.eff,u(i)*min(EMtrq_demand,450),EM_sp);
+            eta_r = interp2(info.torque,info.speed,info.eff,(1-u(i))*min(EMtrq_demand,450),EM_sp);
         else
-            eta_f = interp2(info.torque,info.speed,info.eff,u(1,i)*min(abs(EMtrq_demand),450),u(2,i));
-            eta_r = interp2(info.torque,info.speed,info.eff,(1-u(1,i))*min(abs(EMtrq_demand),450),u(3,i));
+            eta_f = interp2(info.torque,info.speed,info.eff,u(i)*min(abs(EMtrq_demand),450),EM_sp);
+            eta_r = interp2(info.torque,info.speed,info.eff,(1-u(i))*min(abs(EMtrq_demand),450),EM_sp);
         end
-
-        %Calculating J
-
+        %Calculating 
         % penalise excess power
         if (torque_demand >= 0)
-            power_gen = ((u(1,i)*EMtrq_demand*u(2,i))/(0.01*eta_f)) + (((1-u(1,i))*EMtrq_demand*u(3,i))/(0.01*eta_r));
+            power_gen = ((u(i)*EMtrq_demand*EM_sp)/(0.01*eta_f)) + (((1-u(i))*EMtrq_demand*EM_sp)/(0.01*eta_r));
             power_ref = F_trac*v_k;
         else
-            power_gen = abs(((u(1,i)*EMtrq_demand*u(2,i))*(0.01*eta_f)) + (((1-u(1,i))*EMtrq_demand*u(3,i))*(0.01*eta_r)));
+            power_gen = abs(((u(i)*EMtrq_demand*EM_sp)*(0.01*eta_f)) + (((1-u(i))*EMtrq_demand*EM_sp)*(0.01*eta_r)));
             power_ref = abs(F_trac*v_k);
         end
         J1 = (power_ref - power_gen)'*1*(power_ref - power_gen);
-        J2 =  abs(((prev_EM1-u(2,i))/Ts)*veh.mot_inertia)+abs(((prev_EM2-u(3,i))/Ts)*veh.mot_inertia);
-        J = J + J1 + J2;
+        %J2 =  abs(((prev_EM1-u(2,i))/Ts)*veh.mot_inertia)+abs(((prev_EM2-u(3,i))/Ts)*veh.mot_inertia);
+        J = J + J1;
         
         % Calculating resistance forces
         F_aero = (veh.rho*veh.A*veh.Cd*(v_k^2))/2;
-        F_rr = veh.M*9.81*veh.Crr;
+        F_rr = (veh.M*9.81*veh.Crr);
 
         % state dynamics
         v_k_next = v_k + ((torque_demand/(veh.M*veh.R_whl))*veh.f_ratio - F_aero/veh.M - F_rr/veh.M)*Ts;
@@ -131,8 +132,8 @@ function J = EVObjectiveFCN(u, N, Ts, v_curr, v_ref, veh, info, Em1, Em2)
         % Updating variables
         torque_demand = next_torque_demand/veh.f_ratio;
         v_k = v_k_next;
-        prev_EM1= u(2,i);
-        prev_EM2= u(3,i);
+        %prev_EM1= u(2,i);
+        %prev_EM2= u(3,i);
         %SOC = soc_k;
     end
 end
@@ -155,20 +156,22 @@ function [c,ceq]=EVConstraintFCN(SOC,u,N,Ts,veh,v_k,v_ref, info)
         F_rr = veh.M*9.81*veh.Crr;
         F_trac = F_aero + F_rr + veh.M*(v_ref(i) - v_k)/Ts;
         torque_demand = F_trac*veh.R_whl;
-
+        EMtrq_demand=0.3012*torque_demand;
+        EM_sp = abs(v_k*veh.axle_diff_ratio/veh.Wheel);
+        EM_sp=min(1675,EM_sp);
         % Calculating eta_f & eta_r
         if (torque_demand > 0)
-            eta_f = interp2(info.torque,info.speed,info.eff,u(1,i)*min(torque_demand,450),u(2,i));
-            eta_r = interp2(info.torque,info.speed,info.eff,(1-u(1,i))*min(torque_demand,450),u(3,i));
+            eta_f = interp2(info.torque,info.speed,info.eff,u(i)*min(EMtrq_demand,450),EM_sp);
+            eta_r = interp2(info.torque,info.speed,info.eff,(1-u(1,i))*min(EMtrq_demand,450),EM_sp);
         else
-            eta_f = interp2(info.torque,info.speed,info.eff,u(1,i)*min(abs(torque_demand),450),u(2,i));
-            eta_r = interp2(info.torque,info.speed,info.eff,(1-u(1,i))*min(abs(torque_demand),450),u(3,i));
+            eta_f = interp2(info.torque,info.speed,info.eff,u(1,i)*min(abs(EMtrq_demand),450),EM_sp);
+            eta_r = interp2(info.torque,info.speed,info.eff,(1-u(1,i))*min(abs(EMtrq_demand),450),EM_sp);
         end
         if (torque_demand > 0)
-            power_gen = ((u(1,i)*torque_demand*u(2,i))/(0.01*eta_f)) + (((1-u(1,i))*torque_demand*u(3,i))/(0.01*eta_r));
+            power_gen = ((u(i)*EMtrq_demand*EM_sp)/(0.01*eta_f)) + (((1-u(i))*EMtrq_demand*EM_sp)/(0.01*eta_r));
             x=x-(power_gen/E_batt);
         else
-            power_gen = abs(((u(1,i)*torque_demand*u(2,i))*(0.01*eta_f)) + (((1-u(1,i))*torque_demand*u(3,i))*(0.01*eta_r)));
+            power_gen = abs(((u(i)*EMtrq_demand*EM_sp)*(0.01*eta_f)) + (((1-u(i))*EMtrq_demand*EM_sp)*(0.01*eta_r)));
             x=x-(power_gen/E_batt);
         end
         % battery discharge constraints
@@ -176,16 +179,14 @@ function [c,ceq]=EVConstraintFCN(SOC,u,N,Ts,veh,v_k,v_ref, info)
         c((num_of_constraints_per_stage*(i-1))+2)=x-batt_max;
         
         %for motor 1
-        torque_max = interp1(info.torque_limit(:,1),info.torque_limit(:,2),u(2,i));
+        torque_max = interp1(info.torque_limit(:,1),info.torque_limit(:,2),EM_sp);
         torque_min = -torque_max;
-        c((num_of_constraints_per_stage*(i-1))+3)=torque_min-(u(1,i)*torque_demand);
-        c((num_of_constraints_per_stage*(i-1))+4)=(u(1,i)*torque_demand)-torque_max;
+        c((num_of_constraints_per_stage*(i-1))+3)=EMtrq_demand-(u(i)*EMtrq_demand);
+        c((num_of_constraints_per_stage*(i-1))+4)=(u(i)*EMtrq_demand)-torque_max;
         %for motor 2
-        c((num_of_constraints_per_stage*(i-1))+5)=torque_min-((1-u(1,i))*torque_demand);
-        c((num_of_constraints_per_stage*(i-1))+6)=((1-u(1,i))*torque_demand)-torque_max;
-        %if(isnan(Pw_gen) || isnan(Pw_dem))
-            %pause;
-        %end
+        c((num_of_constraints_per_stage*(i-1))+5)=torque_min-((1-u(i))*EMtrq_demand);
+        c((num_of_constraints_per_stage*(i-1))+6)=((1-u(i))*EMtrq_demand)-torque_max;
+
        v_k = v_k + ((F_trac - F_aero - F_rr)/veh.M)*Ts;
     end
     ceq=[];  
