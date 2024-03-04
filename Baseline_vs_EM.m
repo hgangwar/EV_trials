@@ -8,12 +8,12 @@ base_TTrq= base_Trqcmd_1+base_Trqcmd_2;
 base_SOC = base.out.baseline_SOC;
 
 % Load MPC data
-mpc = load("variable_model_fixed_MPC_10ms.mat");
+mpc = load("NMPC_mod4.mat");
 mpc_velocity = mpc.out.velocity;
 mpc_Trqcmd_1 = mpc.out.Trqcmd(:,1);
 mpc_Trqcmd_2 = mpc.out.Trqcmd(:,2);
 mpc_TTrq=mpc_Trqcmd_1+mpc_Trqcmd_2;
-mpc_SOC = mpc.out.SOC_Var;
+mpc_SOC = mpc.out.SOC;
 
 
 % Plot the data

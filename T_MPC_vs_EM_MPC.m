@@ -1,11 +1,11 @@
 % Load baseline data
-base = load("baseline.mat");
-base_velocity = base.out.velocity;
+base = load("NMPC_mod2 .mat");
+base_velocity = base.out.Velocity;
 base_Trqcmd_1 = base.out.Trqcmd(:,1);
 base_Trqcmd_2 = base.out.Trqcmd(:,2);
 base_TTrq= base_Trqcmd_1+base_Trqcmd_2;
 
-base_SOC = base.out.baseline_SOC;
+base_SOC = base.out.SOC;
 
 % Load MPC data
 mpc = load("variable_model_fixed_MPC_10ms.mat");
