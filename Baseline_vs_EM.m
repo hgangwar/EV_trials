@@ -9,7 +9,7 @@ base_decision= base_Trqcmd_1./base_TTrq;
 base_SOC = base.out.baseline_SOC;
 
 % Load MPC data
-mpc = load("NMPC_P3sec.mat");
+mpc = load("NMPC_ts200_P2sec.mat");
 mpc_velocity = mpc.out.velocity;
 mpc_Trqcmd_1 = mpc.out.Trqcmd(:,1);
 mpc_Trqcmd_2 = mpc.out.Trqcmd(:,2);
