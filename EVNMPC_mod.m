@@ -2,7 +2,7 @@ function [U_f,U_r,min_Pwr, flag] = EVNMPC_mod(req_data, current_timestep,SOC, v_
 %% Extrinsic function used by Nonlinear MPC Block
     % Initializing U vector
     N=10;
-    Ts=1e0-1;    
+    Ts=2e0-1;    
     % Using motor speed as decision variable
     u0 = repmat(0.5,1,N);
     LB = zeros(1,N);
@@ -27,6 +27,7 @@ function [U_f,U_r,min_Pwr, flag] = EVNMPC_mod(req_data, current_timestep,SOC, v_
     veh.b = 1.7;
     veh.a = 1.09;
     veh.axle_diff_ratio=3.32;
+    veh.charge_max=3.153;
  
     %% Velocity Reference Vector
     v_ref=zeros(N,1);
@@ -48,7 +49,7 @@ function [U_f,U_r,min_Pwr, flag] = EVNMPC_mod(req_data, current_timestep,SOC, v_
     
     %% Torque limit data
     info.torque_limit=req_data.TorqueVsSpeed;
-    COST = @(u) EVObjectiveFCN(u, N, Ts, v_curr, v_ref, veh, info);
+    COST = @(u) EVObjectiveFCN(SOC, u, N, Ts, v_curr, v_ref, veh, info);
     CONSTRAINTS = @(u) EVConstraintFCN(SOC,u, N,Ts,veh,v_curr,v_ref, info);
     options = optimoptions('fmincon','Algorithm','sqp','Display','iter');
     if (Torque_demand==0)
@@ -77,14 +78,14 @@ function [U_f,U_r,min_Pwr, flag] = EVNMPC_mod(req_data, current_timestep,SOC, v_
     
 end
 
-function J = EVObjectiveFCN(u, N, Ts, v_curr, v_ref, veh, info)
+function J = EVObjectiveFCN(SOC, u, N, Ts, v_curr, v_ref, veh, info)
     v_k = v_curr;
     J = 0;
     % For initial condition
     % Calculating resistance forces
     F_aero = (veh.rho*veh.A*veh.Cd*(v_k^2))/2;
     F_rr = veh.M*9.81*veh.Crr;
-        
+     
     % Calculating current torque demand
     F_trac = F_aero + F_rr + veh.M*(v_ref(1) - v_k)/Ts;
     torque_demand = F_trac*veh.R_whl;

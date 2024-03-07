@@ -1,7 +1,7 @@
 % Load data
-%data = load("pwr_comp.mat");
-data=load("NMPC_mod4.mat");
-baseline_pwr = m_data.out.min_Pwr;
+data = load("pwr_comp.mat");
+data=load("NMPC_ts200_P2sec.mat");
+baseline_pwr = data.out.min_Pwr;
 %mpc_pwr = m_data.out.mpc_pwr*0.3012; % Adjusted MPC power for comparison
 mpc_pwr = data.out.mpc_pwr;
 true_pwr = sum(data.out.real_pwr, 2);

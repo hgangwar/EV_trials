@@ -1,3 +1,4 @@
+close all
 % Load baseline data
 base = load("baseline.mat");
 base_velocity = base.out.velocity;
@@ -79,6 +80,6 @@ step=1:247401;
 figure(2)
 scatter(step,mpc_decision,'filled', 'r');
 hold on;
-scatter(step,base_decision,'filled','b')
+%scatter(step,base_decision,'b')
 title("Decision Variable")
 %legend('MPC', 'Baseline');
