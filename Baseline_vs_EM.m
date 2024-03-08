@@ -80,6 +80,6 @@ step=1:247401;
 figure(2)
 scatter(step,mpc_decision,'filled', 'r');
 hold on;
-%scatter(step,base_decision,'b')
+scatter(step,base_decision,'b')
 title("Decision Variable")
-%legend('MPC', 'Baseline');
+legend('MPC', 'Baseline');
