@@ -96,7 +96,7 @@ function J = EVObjectiveFCN(SOC, u, N, Ts, v_curr, v_ref, veh, info)
         % Calculating eta_f & eta_r
         %% Wheel torque to EM torque
         EMtrq_demand=0.3012*torque_demand;
-        EM_sp = abs(v_k*veh.axle_diff_ratio/veh.Wheel);
+        EM_sp = abs(v_k*veh.axle_diff_ratio/veh.R_whl);
         EM_sp=min(1675,EM_sp);
         if (torque_demand >= 0)
             eta_f = interp2(info.torque,info.speed,info.eff,u(i)*min(EMtrq_demand,450),EM_sp);
@@ -158,7 +158,7 @@ function [c,ceq]=EVConstraintFCN(SOC,u,N,Ts,veh,v_k,v_ref, info)
         F_trac = F_aero + F_rr + veh.M*(v_ref(i) - v_k)/Ts;
         torque_demand = F_trac*veh.R_whl;
         EMtrq_demand=0.3012*torque_demand;
-        EM_sp = abs(v_k*veh.axle_diff_ratio/veh.Wheel);
+        EM_sp = abs(v_k*veh.axle_diff_ratio/veh.R_whl);
         EM_sp=min(1675,EM_sp);
         % Calculating eta_f & eta_r
         if (torque_demand > 0)

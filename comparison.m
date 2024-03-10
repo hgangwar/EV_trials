@@ -10,7 +10,7 @@ base_Ur = base.out.Ur;
 base_SOC = base.out.baseline_SOC;
 
 % Load MPC data
-mpc = load("variable_model_fixed_MPC_10ms.mat");
+mpc = load("main_N_6.mat");
 mpc_velocity = mpc.out.velocity;
 mpc_EMspeed_1 = mpc.out.EMspeed(:,1);
 mpc_EMspeed_2 = mpc.out.EMspeed(:,2);
