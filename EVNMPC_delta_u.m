@@ -1,10 +1,15 @@
-function [uopt, U_f,U_r,min_Pwr, flag] = EVNMPC_mod(req_data, current_timestep,SOC, v_curr,Torque_demand, EMspeed, prev_u)
+function [u_opt, U_f,U_r,min_Pwr, flag] = EVNMPC_delta_u(req_data, current_timestep,SOC, v_curr,Torque_demand, EMspeed, prev_u)
     %% Extrinsic function used by Nonlinear MPC Block
         % Initializing U vector
         N=10;
         Ts=2e0-1;    
         % Using motor speed as decision variable
-        u0 = repmat(0.5,1,N);
+        if Torque_demand>0
+            u0 = repmat(0.2,1,N);
+        else
+            u0 = repmat(0.8,1,N);
+        end
+        %u0 = repmat(0.5,1,N);
         LB = zeros(1,N);
         UB = ones(1,N);
     
@@ -49,14 +54,15 @@ function [uopt, U_f,U_r,min_Pwr, flag] = EVNMPC_mod(req_data, current_timestep,S
         
         %% Torque limit data
         info.torque_limit=req_data.TorqueVsSpeed;
-        COST = @(u) EVObjectiveFCN(SOC, u, N, Ts, v_curr, v_ref, veh, prev_u,info);
+        COST = @(u) EVObjectiveFCN(u, N, Ts, v_curr, v_ref, veh, prev_u,info);
         CONSTRAINTS = @(u) EVConstraintFCN(SOC,u, N,Ts,veh,v_curr,v_ref, info);
-        options = optimoptions('fmincon','Algorithm','sqp','Display','iter');
+        options = optimoptions('fmincon','Algorithm','sqp-legacy','Display','iter');
         if (Torque_demand==0)
             U_f=0;
             U_r=0;
             min_Pwr=0;
             flag=-3;
+            u_opt=0.5;
             return
         end
         [uopt,~,flag,~]= fmincon(COST,u0,[],[],[],[],LB,UB,CONSTRAINTS,options);
@@ -64,7 +70,7 @@ function [uopt, U_f,U_r,min_Pwr, flag] = EVNMPC_mod(req_data, current_timestep,S
         EM_r=EMtrq_demand-EM_f;
         U_f=uopt(1)*Torque_demand;
         U_r=Torque_demand-U_f;
-    
+        u_opt=uopt(1);
         % Calculating eta_f & eta_r
         if (Torque_demand >= 0)
             eta_f = interp2(info.torque,info.speed,info.eff,min(EM_f,450),Em1);
@@ -78,7 +84,7 @@ function [uopt, U_f,U_r,min_Pwr, flag] = EVNMPC_mod(req_data, current_timestep,S
         
     end
     
-    function J = EVObjectiveFCN(SOC, u, N, Ts, v_curr, v_ref, veh, prev_u, info)
+    function J = EVObjectiveFCN(u, N, Ts, v_curr, v_ref, veh, prev_u, info)
         v_k = v_curr;
         J = 0;
         % For initial condition
@@ -117,11 +123,12 @@ function [uopt, U_f,U_r,min_Pwr, flag] = EVNMPC_mod(req_data, current_timestep,S
             J1 = (power_ref - power_gen)'*1*(power_ref - power_gen);
             %J2 =  abs(((prev_EM1-u(2,i))/Ts)*veh.mot_inertia)+abs(((prev_EM2-u(3,i))/Ts)*veh.mot_inertia);
             if i==1
-                delta_u=abs(diff(prev_u,u(i)));
+                delta_u=abs(prev_u-u(i));
             else
-                delta_u=abs(diff(u(i-1),u(i)));
+                delta_u=abs(u(i-1)-u(i));
             end
-            J2=delta_u*1e03;
+            J2=delta_u*1e02/Ts;
+            disp(size(delta_u))
             J = J + J1 + J2;
             
             % Calculating resistance forces

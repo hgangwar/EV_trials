@@ -10,13 +10,13 @@ base_decision= base_Trqcmd_1./base_TTrq;
 base_SOC = base.out.baseline_SOC;
 
 % Load MPC data
-mpc = load("C2_fixed_5ms.mat");
-mpc_velocity = mpc.out.Velocity;
+mpc = load("NMPC_ts200_P2sec_delta_u_ts_sqp_leg_init.mat");
+mpc_velocity = mpc.out.velocity;
 mpc_Trqcmd_1 = mpc.out.Trqcmd(:,1);
 mpc_Trqcmd_2 = mpc.out.Trqcmd(:,2);
 mpc_TTrq=mpc_Trqcmd_1+mpc_Trqcmd_2;
 
-mpc_SOC = mpc.out.SOC_5ms;
+mpc_SOC = mpc.out.SOC;
 mpc_decision = mpc_Trqcmd_1./mpc_TTrq;
 for i=1:247401
     if (base_TTrq(i)==0)
