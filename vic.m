@@ -1,8 +1,8 @@
 base = load("baseline.mat");
 %mpc = load("NMPC_ts200_P2sec_delta_u_without_J2.mat");
 %mpc = load("NMPC_ts200_P2sec_delta_u_ts_sqp_leg_init_2.mat");
-%mpc = load("NMPC_ts200_P2sec_delta_u_ts_sqp_leg_init.mat");
-mpc = load("NMPC_ts200_P2sec_delta_u_feedback.mat");
+mpc = load("NMPC_ts200_P2sec_delta_u_ts_sqp_leg_init.mat");
+%mpc = load("NMPC_ts200_P2sec_delta_u_feedback.mat");
 base_SOC=base.out.baseline_SOC;
 mpc_SOC = mpc.out.SOC;
 SOC_used=60-base_SOC(end);

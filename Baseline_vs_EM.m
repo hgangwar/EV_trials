@@ -1,4 +1,4 @@
-close all
+%close all
 % Load baseline data
 base = load("baseline.mat");
 base_velocity = base.out.velocity;
@@ -10,7 +10,8 @@ base_decision= base_Trqcmd_1./base_TTrq;
 base_SOC = base.out.baseline_SOC;
 
 % Load MPC data
-mpc = load("NMPC_ts200_P2sec_delta_u_ts_sqp_leg_init.mat");
+%mpc = load("NMPC_ts200_P2sec_delta_u_ts_sqp_leg_init.mat");
+mpc = load("NMPC_ts200_P2sec_delta_u_feedback.mat");
 mpc_velocity = mpc.out.velocity;
 mpc_Trqcmd_1 = mpc.out.Trqcmd(:,1);
 mpc_Trqcmd_2 = mpc.out.Trqcmd(:,2);
@@ -56,9 +57,9 @@ legend('MPC', 'Baseline');
 
 % Plot Total Torque
 subplot(3, 2, 4);
-plot(base_TTrq, 'b--');
-hold on;
 plot(mpc_TTrq, 'r-');
+hold on;
+plot(base_TTrq, 'b--');
 title('Total Torque');
 legend('MPC', 'Baseline');
 
@@ -69,6 +70,7 @@ hold on;
 plot(base_SOC, 'b--');
 title('SOC');
 legend('MPC', 'Baseline');
+ylim([56 61])
 
 % Add labels and titles
 xlabel('Time');

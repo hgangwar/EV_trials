@@ -6,15 +6,17 @@ base_Trqcmd_1 = base.out.Trqcmd(:,1);
 base_Trqcmd_2 = base.out.Trqcmd(:,2);
 base_TTrq = base_Trqcmd_1 + base_Trqcmd_2;
 base_SOC = base.out.baseline_SOC;
+%base_pwr = base.out.min_Pwr;
 
 % Load MPC data
-mpc = load("NMPC_mod4.mat");
+mpc = load("NMPC_ts200_P2sec_delta_u_feedback.mat");
 mpc_velocity = mpc.out.velocity;
 mpc_Trqcmd_1 = mpc.out.Trqcmd(:,1);
 mpc_Trqcmd_2 = mpc.out.Trqcmd(:,2);
 mpc_TTrq = mpc_Trqcmd_1 + mpc_Trqcmd_2;
 mpc_SOC = mpc.out.SOC;
-
+mpc_pwr = mpc.out.mpc_pwr;
+base_pwr = mpc.out.min_Pwr;
 % Calculate differences
 diff_velocity = base_velocity - mpc_velocity;
 diff_Trqcmd_1 = base_Trqcmd_1 - mpc_Trqcmd_1;
@@ -25,56 +27,21 @@ diff_TTrq = base_TTrq - mpc_TTrq;
 base_step=step(base_SOC);
 mpc_step=step(mpc_SOC);
 diff_SOC = base_step - mpc_step;
+L=length(diff_SOC);
+POI=[];
+for i=1:L
+    if abs(diff_TTrq(i))<1e-02 && diff_TTrq(i)~=0
+        POI=[POI;i, base_Trqcmd_1(i), base_Trqcmd_2(i), base_pwr(i), mpc_Trqcmd_1(i), mpc_Trqcmd_2(i), mpc_pwr(i), diff_SOC(i)];
+    end
+end
 
-Analysis=[diff_velocity, diff_Trqcmd_1, diff_Trqcmd_2, diff_TTrq, diff_SOC];
-sorted_diff = sortrows(Analysis, 5);
+%Analysis=[diff_velocity, diff_Trqcmd_1, diff_Trqcmd_2, diff_TTrq, diff_SOC];
+sorted_diff = sortrows(POI, 8);
 low=sorted_diff(1:10,:);
 high=sorted_diff(end-9:end,:);
-% Plot the differences
-figure;
-
-% Plot difference in velocity
-subplot(3, 2, 1);
-plot(diff_velocity, 'Color', 'blue');
-title('Velocity Difference');
-xlabel('Time');
-ylabel('Difference');
-grid on;
-
-% Plot difference in Trqcmd_1
-subplot(3, 2, 2);
-plot(diff_Trqcmd_1, 'Color', 'red');
-title('Trqcmd_1 Difference');
-xlabel('Time');
-ylabel('Difference');
-grid on;
-
-% Plot difference in Trqcmd_2
-subplot(3, 2, 3);
-plot(diff_Trqcmd_2, 'Color', 'green');
-title('Trqcmd_2 Difference');
-xlabel('Time');
-ylabel('Difference');
-grid on;
-
-% Plot difference in Total Torque
-subplot(3, 2, 4);
-plot(diff_TTrq, 'Color', 'magenta');
-title('Total Torque Difference');
-xlabel('Time');
-ylabel('Difference');
-grid on;
-
-% Plot difference in SOC
-subplot(3, 2, 5);
-plot(diff_SOC, 'Color', 'cyan');
-title('SOC Difference');
-xlabel('Time');
-ylabel('Difference');
-grid on;
-
-% Add labels and titles
-sgtitle('Differences Between Baseline and MPC Data');
+Analysis.high=high;
+Analysis.low=low;
+save('Analysis.mat',"Analysis");
 
 function x=step(y)
     prev=60;

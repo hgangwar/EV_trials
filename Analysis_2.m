@@ -1,20 +1,27 @@
 % Load difference data
-Points = load("highlight.mat");
+Points = load("Analysis.mat");
 high = Points.high;
 low = Points.low;
 
-% Extract data for high and low ends
-high_velocity = high(:, 1);
-high_trq1 = high(:, 2);
-high_trq2 = high(:, 3);
-high_total_trq = high(:, 4);
-high_SOC = high(:, 5);
+% x axis
+step=1:247401;
 
-low_velocity = low(:, 1);
-low_trq1 = low(:, 2);
-low_trq2 = low(:, 3);
-low_total_trq = low(:, 4);
-low_SOC = low(:, 5);
+% when mpc consumed less SOC then Baseline per step
+high_base_trq1 = high(:, 2);
+high_base_trq2 = high(:, 3);
+high_base_pwr = high(:, 4);
+high_mpc_trq1 = high(:, 5);
+high_mpc_trq2 = high(:, 6);
+high_mpc_pwr = high(:, 7);
+
+% when mpc consumed more SOC then Baseline per step
+low_base_trq1 = low(:, 2);
+low_base_trq2 = low(:, 3);
+low_base_pwr = low(:, 4);
+low_mpc_trq1 = low(:, 5);
+low_mpc_trq2 = low(:, 6);
+low_mpc_pwr = low(:, 7);
+
 
 % Create figure for high-end differences
 figure;
