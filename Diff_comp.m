@@ -6,7 +6,7 @@ base_Trqcmd_1 = base.out.Trqcmd(:,1);
 base_Trqcmd_2 = base.out.Trqcmd(:,2);
 base_TTrq = base_Trqcmd_1 + base_Trqcmd_2;
 base_SOC = base.out.baseline_SOC;
-%base_pwr = base.out.min_Pwr;
+base_pwr = base.out.base_pwr;
 
 % Load MPC data
 mpc = load("NMPC_ts200_P2sec_delta_u_feedback.mat");
@@ -16,7 +16,7 @@ mpc_Trqcmd_2 = mpc.out.Trqcmd(:,2);
 mpc_TTrq = mpc_Trqcmd_1 + mpc_Trqcmd_2;
 mpc_SOC = mpc.out.SOC;
 mpc_pwr = mpc.out.mpc_pwr;
-base_pwr = mpc.out.min_Pwr;
+%base_pwr = mpc.out.min_Pwr;
 % Calculate differences
 diff_velocity = base_velocity - mpc_velocity;
 diff_Trqcmd_1 = base_Trqcmd_1 - mpc_Trqcmd_1;
