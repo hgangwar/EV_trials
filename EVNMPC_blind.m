@@ -30,6 +30,8 @@ function [u_opt, U_f,U_r,min_Pwr, flag] = EVNMPC_blind(req_data,current_timestep
         veh.charge_max=3.153;
      
         %% Velocity Reference Vector
+        F_aero = (veh.rho*veh.A*veh.Cd*(v_curr^2))/2;
+        F_rr = veh.M*9.81*veh.Crr;
         F_trac=Torque_demand/veh.R_whl;
         v_next = v_curr + ((F_trac-F_aero-F_rr)*Ts/veh.M);
         v_ref=v_next*ones(N,1);
