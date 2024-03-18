@@ -8,7 +8,8 @@ base = load("baseline.mat");
 %mpc = load("NMPC_mod.mat");
 %mpc = load("NMPC_ts200_P2sec_delta_u_feedback_with_j2.mat");
 %mpc = load("NMPC_ts200_P2sec_delta_u_feedback_blind.mat");
-mpc = load("NMPC_ts200_P2sec_delta_u_feedback_blind_J1.mat");
+mpc = load("NMPC_ts400_P4sec_delta_u_feedback_sqp_Pdriver.mat");
+
 base_SOC=base.out.baseline_SOC;
 mpc_SOC = mpc.out.SOC;
 SOC_used=60-base_SOC(end);
@@ -17,5 +18,10 @@ percentage=(savings/SOC_used)*100;
 disp(percentage)
 step=1:247401;
 figure(3)
+<<<<<<< Updated upstream
 scatter(step,mpc.out.prev_u, 'r');
 %performance=[performance; (percentage)];
+=======
+scatter(step,mpc.out.prev_u, 10,'r');
+%performance=[performance; (percentage)];n
+>>>>>>> Stashed changes
