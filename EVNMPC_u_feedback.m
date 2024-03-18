@@ -3,13 +3,6 @@ function [u_opt, U_f,U_r,min_Pwr, flag] = EVNMPC_u_feedback(req_data, current_ti
         % Initializing U vector
         N=10;
         Ts=2e0-1;    
-        % Using motor speed as decision variable
-        %if Torque_demand>0
-        %    u0 = repmat(0.2,1,N);
-        %else
-        %    u0 = repmat(0.8,1,N);
-        %end
-        %u0 = repmat(0.5,1,N);
         u0 = prev_u;
         LB = zeros(1,N);
         UB = ones(1,N);
@@ -96,8 +89,6 @@ function [u_opt, U_f,U_r,min_Pwr, flag] = EVNMPC_u_feedback(req_data, current_ti
         % Calculating current torque demand
         F_trac = F_aero + F_rr + veh.M*(v_ref(1) - v_k)/Ts;
         torque_demand = F_trac*veh.R_whl;
-        %prev_EM1=Em1;
-        %prev_EM2=Em2;
         
         for i=1:N
             % Calculating eta_f & eta_r
@@ -128,8 +119,10 @@ function [u_opt, U_f,U_r,min_Pwr, flag] = EVNMPC_u_feedback(req_data, current_ti
             else
                 delta_u=abs(u(i-1)-u(i));
             end
-            J2=delta_u*1e02/Ts;
-            J = J + J1 +J2;
+            %J2=delta_u*1e02/Ts;
+            %J = J + J1 +J2;            
+            J = J + J1;
+            
             
             % Calculating resistance forces
             F_aero = (veh.rho*veh.A*veh.Cd*(v_k^2))/2;
@@ -146,9 +139,6 @@ function [u_opt, U_f,U_r,min_Pwr, flag] = EVNMPC_u_feedback(req_data, current_ti
             % Updating variables
             torque_demand = next_torque_demand/veh.f_ratio;
             v_k = v_k_next;
-            %prev_EM1= u(2,i);
-            %prev_EM2= u(3,i);
-            %SOC = soc_k;
         end
     end
     
