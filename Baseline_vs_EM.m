@@ -1,4 +1,4 @@
-%close all
+close all
 % Load baseline data
 base = load("baseline.mat");
 base_velocity = base.out.velocity;
@@ -10,9 +10,17 @@ base_decision= base_Trqcmd_1./base_TTrq;
 base_SOC = base.out.baseline_SOC;
 
 % Load MPC data
-mpc = load("NMPC_ts200_P2sec_delta_u_ts_sqp_leg_init.mat");
+mpc = load("NMPC_mod.mat");
+%mpc = load("NMPC_ts200_P2sec_delta_u.mat");
+%mpc = load("NMPC_ts200_P2sec_delta_u_without_J2.mat");
+%mpc = load("NMPC_ts200_P2sec_delta_u_ts_sqp_leg_init.mat");
+%mpc = load("NMPC_ts200_P2sec_delta_u_ts_sqp_leg_init_2.mat");
 %mpc = load("NMPC_ts200_P2sec_delta_u_feedback.mat");
-mpc_velocity = mpc.out.velocity;
+%mpc = load("NMPC_ts200_P2sec_delta_u_feedback_sqp.mat");
+%mpc = load("NMPC_ts200_P2sec_delta_u_feedback_with_j2.mat");
+%mpc = load("NMPC_ts200_P2sec_delta_u_feedback_blind.mat");
+
+mpc_velocity = mpc.out.Velocity;
 mpc_Trqcmd_1 = mpc.out.Trqcmd(:,1);
 mpc_Trqcmd_2 = mpc.out.Trqcmd(:,2);
 mpc_TTrq=mpc_Trqcmd_1+mpc_Trqcmd_2;
@@ -72,16 +80,20 @@ title('SOC');
 legend('MPC', 'Baseline');
 ylim([56 61])
 
+% Decision Policy
+subplot(3, 2, 6);
+step=1:247401;
+line_width=5;
+scatter(step,mpc_decision,line_width,'filled', 'r');
+hold on;
+scatter(step,base_decision,line_width,'b')
+title("Decision Variable")
+legend('MPC', 'Baseline');
+
 % Add labels and titles
 xlabel('Time');
 ylabel('Value');
 sgtitle('Comparison of Baseline and MPC Data');
 
 
-step=1:247401;
-figure(2)
-scatter(step,mpc_decision,'filled', 'r');
-hold on;
-scatter(step,base_decision,'b')
-title("Decision Variable")
-legend('MPC', 'Baseline');
+

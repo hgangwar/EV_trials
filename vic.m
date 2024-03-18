@@ -18,4 +18,4 @@ disp(percentage)
 step=1:247401;
 figure(3)
 scatter(step,mpc.out.prev_u, 'r');
-%performance=[performance; (percentage)];n
+%performance=[performance; (percentage)];
