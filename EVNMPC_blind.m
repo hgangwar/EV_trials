@@ -3,7 +3,6 @@ function [u_opt, U_f,U_r,min_Pwr, flag] = EVNMPC_blind(req_data,current_timestep
         % Initializing U vector
         N=10;
         Ts=2e0-1;    
-
         u0 = prev_u;
         LB = zeros(1,N);
         UB = ones(1,N);
