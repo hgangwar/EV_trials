@@ -94,3 +94,12 @@ ylabel('Power');
 legend('MPC - Baseline Pwr');
 grid on;
 sgtitle('MPC SOC/step greater than Baseline SOC/step')
+% Enable datatips by default
+h = datacursormode(gcf);
+set(h, 'UpdateFcn', @myupdatefcn);
+
+% Function to display datatip
+function txt = myupdatefcn(~, event)
+    pos = event.Position;
+    txt = {['X: ',num2str(pos(1))],['Y: ',num2str(pos(2))]}; % Display x and y coordinates
+end

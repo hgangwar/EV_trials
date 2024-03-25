@@ -1,6 +1,6 @@
 close all
 % Load baseline data
-base = load("baseline.mat");
+base = load("baseline_wtp3.mat");
 base_velocity = base.out.velocity;
 base_Trqcmd_1 = base.out.Trqcmd(:,1);
 base_Trqcmd_2 = base.out.Trqcmd(:,2);
@@ -16,9 +16,10 @@ base_SOC = base.out.baseline_SOC;
 %mpc = load("NMPC_ts200_P2sec_delta_u_ts_sqp_leg_init.mat");
 %mpc = load("NMPC_ts200_P2sec_delta_u_ts_sqp_leg_init_2.mat");
 %mpc = load("NMPC_ts200_P2sec_delta_u_feedback.mat");
-mpc = load("NMPC_ts200_P2sec_delta_u_feedback_sqp.mat");
+%mpc = load("NMPC_ts200_P2sec_delta_u_feedback_sqp.mat");
 %mpc = load("NMPC_ts200_P2sec_delta_u_feedback_with_j2.mat");
 %mpc = load("NMPC_ts200_P2sec_delta_u_feedback_blind.mat");
+mpc = load("NMPC_ts200_P2sec_delta_u_feedback_blind_wtp3.mat");
 
 mpc_velocity = mpc.out.velocity;
 mpc_Trqcmd_1 = mpc.out.Trqcmd(:,1);
@@ -27,7 +28,8 @@ mpc_TTrq=mpc_Trqcmd_1+mpc_Trqcmd_2;
 
 mpc_SOC = mpc.out.SOC;
 mpc_decision = mpc_Trqcmd_1./mpc_TTrq;
-for i=1:247401
+Sci_time=length(mpc_decision);
+for i=1:Sci_time
     if (base_TTrq(i)==0)
         base_decision(i)=0;
     end
