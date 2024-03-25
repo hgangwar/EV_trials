@@ -1,4 +1,4 @@
-function [u_opt, U_f,U_r,min_Pwr, flag] = EVNMPC_blind(req_data,current_timestep,SOC, v_curr,Torque_demand, EMspeed, prev_u)
+function [u_opt, U_f,U_r,min_Pwr, flag] = EVNMPC_blind(req_data, SOC, v_curr,Torque_demand, EMspeed, prev_u)
     %% Extrinsic function used by Nonlinear MPC Block
         % Initializing U vector
         N=10;

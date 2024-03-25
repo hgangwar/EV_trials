@@ -1,5 +1,6 @@
 %base = load("baseline.mat");
-base = load("baseline_wtp3.mat");
+%base = load("baseline_wtp3.mat");
+base = load("baseline_us06.mat");
 base_velocity = base.out.velocity;
 base_Trqcmd_1 = base.out.Trqcmd(:,1);
 base_Trqcmd_2 = base.out.Trqcmd(:,2);
@@ -16,14 +17,15 @@ base_decision= base_Trqcmd_1./base_TTrq;
 %mpc = load("NMPC_ts200_P2sec_delta_u_feedback_with_j2.mat");
 %mpc = load("NMPC_ts200_P2sec_delta_u_feedback_blind.mat");
 %mpc = load("NMPC_ts400_P4sec_delta_u_feedback_sqp_Pdriver.mat");
-mpc = load("NMPC_ts200_P2sec_delta_u_feedback_blind_wtp3.mat");
+%mpc = load("NMPC_ts200_P2sec_delta_u_feedback_blind_ebiased_wltp3.mat");
+mpc = load("NMPC_ts200_P2sec_delta_u_feedback_blind_J1_J2_us06.mat");
 mpc_velocity = mpc.out.velocity;
 mpc_Trqcmd_1 = mpc.out.Trqcmd(:,1);
 mpc_Trqcmd_2 = mpc.out.Trqcmd(:,2);
 mpc_TTrq=mpc_Trqcmd_1+mpc_Trqcmd_2;
 mpc_decision = mpc_Trqcmd_1./mpc_TTrq;
 
-base_SOC=base.out.baseline_SOC;
+base_SOC=base.out.SOC;
 mpc_SOC = mpc.out.SOC;
 SOC_used=60-base_SOC(end);
 savings=mpc_SOC(end)-base_SOC(end);

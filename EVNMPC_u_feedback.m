@@ -48,7 +48,7 @@ function [u_opt, U_f,U_r,min_Pwr, flag] = EVNMPC_u_feedback(req_data, current_ti
         
         %% Torque limit data
         info.torque_limit=req_data.TorqueVsSpeed;
-        COST = @(u) EVObjectiveFCN(SOC, u, N, Ts, v_curr, v_ref, veh, prev_u(1),info);
+        COST = @(u) EVObjectiveFCN(u, N, Ts, v_curr, v_ref, veh, prev_u(1),info);
         CONSTRAINTS = @(u) EVConstraintFCN(SOC,u, N,Ts,veh,v_curr,v_ref, info);
         options = optimoptions('fmincon','Algorithm','sqp','Display','iter');
         if (Torque_demand==0)
@@ -78,7 +78,7 @@ function [u_opt, U_f,U_r,min_Pwr, flag] = EVNMPC_u_feedback(req_data, current_ti
         
     end
     
-    function J = EVObjectiveFCN(SOC, u, N, Ts, v_curr, v_ref, veh, prev_u, info)
+    function J = EVObjectiveFCN(u, N, Ts, v_curr, v_ref, veh, prev_u, info)
         v_k = v_curr;
         J = 0;
         % For initial condition
