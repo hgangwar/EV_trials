@@ -7,18 +7,34 @@ base_Trqcmd_2 = base.out.Trqcmd(:,2);
 base_TTrq= base_Trqcmd_1+base_Trqcmd_2;
 base_decision= base_Trqcmd_1./base_TTrq;
 
+cases=["NMPC_mod.mat";                                      %1
+    "NMPC_ts200_P2sec_delta_u_without_J2.mat";              %2
+    "NMPC_ts200_P2sec_delta_u.mat";                         %3
+    "NMPC_ts200_P2sec_delta_u_ts_sqp_leg_init.mat";         %4
+    "NMPC_ts200_P2sec_delta_u_ts_sqp_leg_init_2.mat";       %5
+    "NMPC_ts200_P2sec_delta_u_feedback.mat";                %6
+    "NMPC_ts200_P2sec_delta_u_feedback_sqp.mat";            %7
+    "NMPC_ts200_P2sec_delta_u_feedback_with_j2.mat";        %8
+    "NMPC_ts200_P2sec_delta_u_feedback_blind.mat";          %9
+    ];
+ndx=5;
+mpc = load(cases(ndx));
+
+%mpc = load("NMPC_mod.mat");
+%mpc = load("NMPC_ts200_P2sec_delta_u.mat");
 %mpc = load("NMPC_ts200_P2sec_delta_u_without_J2.mat");
 %mpc = load("NMPC_ts200_P2sec_delta_u_ts_sqp_leg_init_2.mat");
 %mpc = load("NMPC_ts200_P2sec_delta_u_ts_sqp_leg_init.mat");
 %mpc = load("NMPC_ts200_P2sec_delta_u_feedback.mat");
-mpc = load("NMPC_ts200_P2sec_delta_u_feedback_sqp.mat");
-%mpc = load("NMPC_ts200_P2sec_delta_u.mat");
-%mpc = load("NMPC_mod.mat");
+%mpc = load("NMPC_ts200_P2sec_delta_u_feedback_sqp.mat");
 %mpc = load("NMPC_ts200_P2sec_delta_u_feedback_with_j2.mat");
 %mpc = load("NMPC_ts200_P2sec_delta_u_feedback_blind.mat");
+
 %mpc = load("NMPC_ts400_P4sec_delta_u_feedback_sqp_Pdriver.mat");
 %mpc = load("NMPC_ts200_P2sec_delta_u_feedback_blind_ebiased_wltp3.mat");
-mpc = load("NMPC_ts200_P2sec_delta_u_feedback_blind_J1_J2_us06.mat");
+%mpc = load("NMPC_ts200_P2sec_delta_u_feedback_blind_J1_J2_us06.mat");
+%mpc = load("NMPC_ts200_P2sec_delta_u_feedback_blind_wtp3.mat");
+
 mpc_velocity = mpc.out.velocity;
 mpc_Trqcmd_1 = mpc.out.Trqcmd(:,1);
 mpc_Trqcmd_2 = mpc.out.Trqcmd(:,2);
@@ -36,5 +52,5 @@ line_width=5;
 scatter(step,mpc_decision,line_width,'filled', 'r');
 hold on;
 scatter(step,base_decision,line_width,'b')
-%performance=[performance; (percentage)];
+%performance=[performance; [cases(ndx),percentage]];
 
