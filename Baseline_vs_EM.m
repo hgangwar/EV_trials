@@ -96,4 +96,22 @@ ylabel('Value');
 sgtitle('Comparison of Baseline and MPC Data');
 
 
+% Define the edges for the histogram bins
+edges = 0:0.2:1; % Bins of width 0.2, from 0 to 1
 
+figure(2)
+subplot(1, 2, 1);
+% Plot the histogram with percentage as the y-axis
+histogram(mpc_decision, edges, 'Normalization', 'probability')
+xlabel('Value')
+ylabel('Percentage of Occurrence')
+title('Control Policy for MPC')
+
+subplot(1, 2, 2);
+histogram(base_decision, edges, 'Normalization', 'probability')
+xlabel('Value')
+ylabel('Percentage of Occurrence')
+title('Control Policy for Baseline.')
+
+% Show grid
+grid on

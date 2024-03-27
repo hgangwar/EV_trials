@@ -1,6 +1,7 @@
-%base = load("baseline.mat");
+base = load("baseline.mat");
 %base = load("baseline_wtp3.mat");
-base = load("baseline_us06.mat");
+%base = load("baseline_us06.mat");
+
 base_velocity = base.out.velocity;
 base_Trqcmd_1 = base.out.Trqcmd(:,1);
 base_Trqcmd_2 = base.out.Trqcmd(:,2);

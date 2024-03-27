@@ -7,13 +7,15 @@ speed = Data2.speed;
 TorqueVsSpeed = Data3.TorqueVsSpeed;
 
 % Load baseline data
-base = load("baseline.mat");
+base = load("baseline2.mat");
 base_velocity = base.out.velocity;
 base_Trqcmd_f = base.out.Trqcmd(:,1);
 base_Trqcmd_r = base.out.Trqcmd(:,2);
 base_TTrq = base_Trqcmd_f + base_Trqcmd_r;
-base_SOC = base.out.baseline_SOC;
-base_pwr = base.out.base_pwr;
+%base_SOC = base.out.baseline_SOC;
+base_SOC = base.out.SOC;
+%base_pwr = base.out.base_pwr;
+base_pwr = base.out.min_pwr;
 base_EMspeed_f = base.out.EMspeed(:,1);
 base_EMspeed_r = base.out.EMspeed(:,2);
 
