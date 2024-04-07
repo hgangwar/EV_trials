@@ -1,4 +1,5 @@
 close all
+clc
 % Load baseline data
 base = load("baseline.mat");
 base_velocity = base.out.velocity;
@@ -10,15 +11,16 @@ base_decision= base_Trqcmd_1./base_TTrq;
 base_SOC = base.out.baseline_SOC;
 
 % Load MPC data
+%mpc = load("Nominal_MPC_10ms.mat");
 %mpc = load("NMPC_mod.mat");
 %mpc = load("NMPC_ts200_P2sec_delta_u.mat");
 %mpc = load("NMPC_ts200_P2sec_delta_u_without_J2.mat");
 %mpc = load("NMPC_ts200_P2sec_delta_u_ts_sqp_leg_init.mat");
 %mpc = load("NMPC_ts200_P2sec_delta_u_ts_sqp_leg_init_2.mat");
 %mpc = load("NMPC_ts200_P2sec_delta_u_feedback.mat");
-mpc = load("NMPC_ts200_P2sec_delta_u_feedback_sqp.mat");
+%mpc = load("NMPC_ts200_P2sec_delta_u_feedback_sqp.mat");
 %mpc = load("NMPC_ts200_P2sec_delta_u_feedback_with_j2.mat");
-%mpc = load("NMPC_ts200_P2sec_delta_u_feedback_blind.mat");
+mpc = load("NMPC_ts200_P2sec_delta_u_feedback_blind.mat");
 
 mpc_velocity = mpc.out.velocity;
 mpc_Trqcmd_1 = mpc.out.Trqcmd(:,1);
@@ -97,20 +99,23 @@ sgtitle('Comparison of Baseline and MPC Data');
 
 
 % Define the edges for the histogram bins
-edges = 0:0.2:1; % Bins of width 0.2, from 0 to 1
+edges = 0:0.1:1; % Bins of width 0.2, from 0 to 1
 
 figure(2)
 subplot(1, 2, 1);
 % Plot the histogram with percentage as the y-axis
 histogram(mpc_decision, edges, 'Normalization', 'probability')
+hold on;
 xlabel('Value')
 ylabel('Percentage of Occurrence')
 title('Control Policy for MPC')
+ylim([0 1])
 
 subplot(1, 2, 2);
 histogram(base_decision, edges, 'Normalization', 'probability')
+ylim([0 1])
 xlabel('Value')
-ylabel('Percentage of Occurrence')
+ylabel('Percentage of Occurrence')  
 title('Control Policy for Baseline.')
 
 % Show grid
