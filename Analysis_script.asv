@@ -2,14 +2,14 @@ close all
 clear
 % Load Analysis data
 % Load MPC data
-cases=["Optimised_Analysis.mat";            %1
-"Optimised_with_delta_u_Analysis.mat";      %2
-"Optimised_with_full_feedback_Analysis.mat"; %3
-"Optimised_blind_Analysis.mat"              %4
+cases=["Optimised_Analysis.mat";
+"Optimised_with_delta_u_Analysis.mat";
+"Optimised_with_full_feedback_Analysis.ma";
+"Optimised_blind_Analysis.mat"          %6
     ];
-ndx=4;
+ndx=6;
 mpc = load(cases(ndx));
-load(cases(ndx));
+load("Analysis.mat");
 high = Analysis.high;
 low = Analysis.low;
 
@@ -48,7 +48,7 @@ s2=scatter(1:numel(high_mpc_trq1), high_mpc_trq1, z2, 'r', 'o', 'LineWidth', lin
 s2.DataTipTemplate.DataTipRows(1).Label = "i";
 s2.DataTipTemplate.DataTipRows(2).Label = "Trq";
 s2.DataTipTemplate.DataTipRows(3).Label = "eff";
-title('High Data: Trq front Comparison');
+title('High Data: Trq1 Comparison');
 xlabel('Step');
 ylabel('Torque');
 legend('Baseline', 'MPC');
@@ -67,7 +67,7 @@ scatter(1:numel(high_mpc_trq2), high_mpc_trq2, z4, 'r', 'o', 'LineWidth', lineWi
 s4.DataTipTemplate.DataTipRows(1).Label = "i";
 s4.DataTipTemplate.DataTipRows(2).Label = "Trq";
 s4.DataTipTemplate.DataTipRows(3).Label = "eff";
-title('High Data: Trq rear Comparison');
+title('High Data: Trq2 Comparison');
 xlabel('Step');
 ylabel('Torque');
 legend('Baseline', 'MPC');
@@ -78,7 +78,7 @@ scatter(1:numel(high_base_pwr), high_base_pwr-high_mpc_pwr, 'b', 'x', 'LineWidth
 title('High Data: Power Comparison');
 xlabel('Step');
 ylabel('Power');
-legend('y = Baseline - MPC Pwr');
+legend('Baseline - MPC Pwr');
 grid on;
 sgtitle('MPC Power less than Baseline Power') 
 
@@ -98,7 +98,7 @@ r2= scatter(1:numel(low_mpc_trq1), low_mpc_trq1, y2, 'r', 'o', 'LineWidth', line
 r2.DataTipTemplate.DataTipRows(1).Label = "i";
 r2.DataTipTemplate.DataTipRows(2).Label = "Trq";
 r2.DataTipTemplate.DataTipRows(3).Label = "eff";
-title('Low Data: Trq front Comparison');
+title('Low Data: Trq1 Comparison');
 xlabel('Step');
 ylabel('Torque');
 legend('Baseline', 'MPC');
@@ -117,7 +117,7 @@ r4=scatter(1:numel(low_mpc_trq2), low_mpc_trq2, y4, 'r', 'o', 'LineWidth', lineW
 r4.DataTipTemplate.DataTipRows(1).Label = "i";
 r4.DataTipTemplate.DataTipRows(2).Label = "Trq";
 r4.DataTipTemplate.DataTipRows(3).Label = "eff";
-title('Low Data: Trq rear Comparison');
+title('Low Data: Trq2 Comparison');
 xlabel('Step');
 ylabel('Torque');
 legend('Baseline', 'MPC');
@@ -132,7 +132,7 @@ title('Low Data: Power Comparison');
 xlabel('Step');
 ylabel('Power');
 %legend('Baseline', 'MPC');
-legend('y= MPC - Baseline Pwr');
+legend('MPC - Baseline Pwr');
 grid on;
 sgtitle('MPC Power greater than Baseline power')
 
@@ -167,7 +167,7 @@ d2=scatter(1:numel(random_mpc_trq1), random_mpc_trq1, c2, 'r', 'o', 'LineWidth',
 d2.DataTipTemplate.DataTipRows(1).Label = "i";
 d2.DataTipTemplate.DataTipRows(2).Label = "Trq";
 d2.DataTipTemplate.DataTipRows(3).Label = "eff";
-title('Mid Data: Trq front Comparison');
+title('Random Data: Trq1 Comparison');
 xlabel('Step');
 ylabel('Torque');
 legend('Baseline', 'MPC');
@@ -186,7 +186,7 @@ d4=scatter(1:numel(random_mpc_trq2), random_mpc_trq2, c4, 'r', 'o', 'LineWidth',
 d4.DataTipTemplate.DataTipRows(1).Label = "i";
 d4.DataTipTemplate.DataTipRows(2).Label = "Trq";
 d4.DataTipTemplate.DataTipRows(3).Label = "eff";
-title('Mid Data: Trq rear Comparison');
+title('Random Data: Trq2 Comparison');
 xlabel('Step');
 ylabel('Torque');
 legend('Baseline', 'MPC');
@@ -197,6 +197,6 @@ scatter(1:numel(random_base_pwr), random_base_pwr-random_mpc_pwr, 'b', 'x', 'Lin
 title('Middle Data: Power Comparison');
 xlabel('Step');
 ylabel('Power');
-legend('y = Baseline - MPC Pwr');
+legend('Baseline - MPC Pwr');
 grid on;
 sgtitle('MPC Power less than Baseline Power (middle)');

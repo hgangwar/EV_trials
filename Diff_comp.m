@@ -1,4 +1,5 @@
 close all
+clear
 Data2 = load("eff_map.mat");
 Data3 = load("Max_Torque_vs_EMSpeed.mat");
 eff = Data2.eff;
@@ -20,7 +21,15 @@ base_EMspeed_f = base.out.EMspeed(:,1);
 base_EMspeed_r = base.out.EMspeed(:,2);
 
 % Load MPC data
-mpc = load("NMPC_mod5.mat");
+cases=["Nominal_MPC_10ms.mat"                               %1
+    "NMPC_mod5.mat";                                         %2      
+    "NMPC_ts200_P2sec_delta_u_ts_sqp_leg_init.mat";         %3
+    "NMPC_ts200_P2sec_delta_u_ts_sqp_leg_init_2.mat";       %4
+    "NMPC_ts200_P2sec_delta_u_feedback.mat";                %5      
+    "NMPC_ts200_P2sec_delta_u_feedback_blind.mat";          %6
+    ];
+ndx=6;
+mpc = load(cases(ndx));
 mpc_velocity = mpc.out.velocity;
 mpc_Trqcmd_f= mpc.out.Trqcmd(:,1);
 mpc_Trqcmd_r = mpc.out.Trqcmd(:,2);
@@ -69,6 +78,6 @@ high=sorted_diff(end-9:end,:);
 Analysis.high=high;
 Analysis.low=low;
 Analysis.random=selected_points;
-save('Analysis.mat',"Analysis");
+save(cases(ndx)+'_Analysis.mat',"Analysis");
 
     
