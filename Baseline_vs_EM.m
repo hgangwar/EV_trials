@@ -20,7 +20,8 @@ base_SOC = base.out.baseline_SOC;
 %mpc = load("NMPC_ts200_P2sec_delta_u_feedback.mat"); %3
 %mpc = load("NMPC_ts200_P2sec_delta_u_feedback_sqp.mat");
 %mpc = load("NMPC_ts200_P2sec_delta_u_feedback_with_j2.mat"); 
-mpc = load("NMPC_ts200_P2sec_delta_u_feedback_blind.mat"); %4
+%mpc = load("NMPC_ts200_P2sec_delta_u_feedback_blind.mat"); %4
+mpc = load("NMPC_ts200_P2sec_delta_u_feedback_non_overshooting.mat"); %5
 
 mpc_velocity = mpc.out.velocity;
 mpc_Trqcmd_1 = mpc.out.Trqcmd(:,1);

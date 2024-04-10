@@ -145,8 +145,7 @@ function [u_opt, U_f,U_r,min_Pwr, flag] = EVNMPC_u_feedback(req_data, current_ti
     %%
     function [c,ceq]=EVConstraintFCN(SOC,u,N,Ts,veh,v_k,v_ref, info)
         % split :- 1 -> Front motor
-        % split :- 0 -> Rear motor
-        
+        % split :- 0 -> Rear motorS 
         % calculate curr torque and torque vec
         num_of_constraints_per_stage=6;
         total_num_cosntraints=N*num_of_constraints_per_stage;
