@@ -56,6 +56,10 @@ diff_Trqcmd_1 = base_Trqcmd_f - mpc_Trqcmd_f;
 diff_Trqcmd_2 = base_Trqcmd_r - mpc_Trqcmd_r;
 diff_TTrq = base_TTrq - mpc_TTrq;
 diff_Pwr = base_pwr-mpc_pwr;
+% save efficiencies
+efficiencies.mpc=[eta_f_mpc', eta_r_mpc'];
+efficiencies.base=[eta_f_base', eta_r_base'];
+save("efficiencies.mat","efficiencies");
 
 POI=[];
 for i=1:sim_len
