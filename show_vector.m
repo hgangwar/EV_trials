@@ -2,7 +2,7 @@ close all
 load("Full_analysis.mat")
 load("Ham_analysis.mat")
 load("Trq_dist.mat")
-ndx=9;
+ndx=5;
 Ham_high=Ham_analysis.high(ndx,2:end);
 flag=Ham_analysis.flag_high(ndx,2:end)==0;
 Ham_feasible=Ham_high(flag);
@@ -30,5 +30,5 @@ scatter(step, Trq_r,'red');
 title("Trq Vector Distribution")
 legend("Trq Vector Rear")
 sgtitle(['Optimisation space, Trq for demand=',num2str(Trq_dist.demand_high(ndx))]);
-
+%legend('Trq f','Trq r');
 
