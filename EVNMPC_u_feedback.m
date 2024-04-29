@@ -114,11 +114,11 @@ function [u_opt, U_f,U_r,min_Pwr, flag] = EVNMPC_u_feedback(req_data, current_ti
             end
             J1 = (power_ref - power_gen)'*1*(power_ref - power_gen);
             %J2 =  abs(((prev_EM1-u(2,i))/Ts)*veh.mot_inertia)+abs(((prev_EM2-u(3,i))/Ts)*veh.mot_inertia);
-            if i==1
-                delta_u=abs(prev_u-u(i));
-            else
-                delta_u=abs(u(i-1)-u(i));
-            end
+            %if i==1
+            %    delta_u=abs(prev_u-u(i));
+            %else
+            %    delta_u=abs(u(i-1)-u(i));
+            %end
             %J2=delta_u*1e02/Ts;
             %J = J + J1 +J2;            
             J = J + J1;
